@@ -20,6 +20,7 @@ import * as settings from 'constants/settings';
 import type { Claim } from 'types/claim';
 import type { Subscription } from 'types/subscription';
 import FileDownloadLink from 'component/fileDownloadLink';
+import classnames from 'classnames';
 
 type Props = {
   claim: Claim,
@@ -115,10 +116,9 @@ class FilePage extends React.Component<Props> {
     const isRewardContent = rewardedContentClaimIds.includes(claim.claim_id);
     const shouldObscureThumbnail = obscureNsfw && metadata.nsfw;
     const { height, channel_name: channelName, value } = claim;
-    // TODO: fix getMediaType logic (lbry-redux)
-    const mediaType = Lbry.getMediaType(null, filename) || Lbry.getMediaType(contentType);
+    const mediaType = Lbry.getMediaType(contentType, filename);
     const isPlayable =
-      Object.values(player.mime).indexOf(contentType) !== -1 || FilePage.MEDIA_TYPES.indexOf(mediaType);
+      Object.values(player.mime).includes(contentType) || FilePage.MEDIA_TYPES.includes(mediaType);
     const channelClaimId =
       value && value.publisherSignature && value.publisherSignature.certificateId;
     let subscriptionUri;
@@ -136,7 +136,12 @@ class FilePage extends React.Component<Props> {
     // We will select the claim id before they publish
     let editUri;
     if (claimIsMine) {
-      editUri = buildURI({ channelName, contentName: claim.name });
+      const uriObject = { contentName: claim.name, claimId: claim.claim_id };
+      if (channelName) {
+        uriObject.channelName = channelName;
+      }
+
+      editUri = buildURI(uriObject);
     }
 
     return (
@@ -147,11 +152,19 @@ class FilePage extends React.Component<Props> {
           </section>
         ) : (
           <section className="card">
-            {isPlayable ? (
-              <Video className="content__embedded" uri={uri} />
-            ) : (
-              <Thumbnail shouldObscure={shouldObscureThumbnail} src={thumbnail} />
-            )}
+            {isPlayable && <Video className="content__embedded" uri={uri} />}
+            {!isPlayable &&
+              (thumbnail ? (
+                <Thumbnail shouldObscure={shouldObscureThumbnail} src={thumbnail} />
+              ) : (
+                <div
+                  className={classnames('content__empty', {
+                    'content__empty--nsfw': shouldObscureThumbnail,
+                  })}
+                >
+                  <div className="card__media-text">{__('This content is not playable.')}</div>
+                </div>
+              ))}
             <div className="card__content">
               <div className="card__title-identity--file">
                 <h1 className="card__title card__title--file">{title}</h1>
@@ -169,7 +182,6 @@ class FilePage extends React.Component<Props> {
               {metadata.nsfw && <div>NSFW</div>}
               <div className="card__channel-info">
                 <UriIndicator uri={uri} link />
-
                 <div className="card__actions card__actions--no-margin">
                   {claimIsMine ? (
                     <Button
@@ -182,21 +194,26 @@ class FilePage extends React.Component<Props> {
                       }}
                     />
                   ) : (
-                    <React.Fragment>
+                    <SubscribeButton uri={subscriptionUri} channelName={channelName} />
+                  )}
+                </div>
+              </div>
+              {!claimIsMine ||
+                (speechSharable && (
+                  <div className="card__actions card__actions--end">
+                    {!claimIsMine && (
                       <Button
                         button="alt"
                         icon="Send"
                         label={__('Enjoy this? Send a tip')}
                         onClick={() => openModal({ id: MODALS.SEND_TIP }, { uri })}
                       />
-                      <SubscribeButton uri={subscriptionUri} channelName={channelName} />
-                    </React.Fragment>
-                  )}
-                  {speechSharable && (
-                    <ViewOnWebButton claimId={claim.claim_id} claimName={claim.name} />
-                  )}
-                </div>
-              </div>
+                    )}
+                    {speechSharable && (
+                      <ViewOnWebButton claimId={claim.claim_id} claimName={claim.name} />
+                    )}
+                  </div>
+                ))}
               <FormRow alignRight>
                 <FormField
                   type="checkbox"

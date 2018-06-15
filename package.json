@@ -48,7 +48,7 @@
     "formik": "^0.10.4",
     "hast-util-sanitize": "^1.1.2",
     "keytar": "^4.2.1",
-    "lbry-redux": "lbryio/lbry-redux#7759bc6e8c482bed173d1f10aee6f6f9a439a15a",
+    "lbry-redux": "lbryio/lbry-redux#52ffd4c6bdf699d1d0bfebe905fb4cb3a95cf553",
     "localforage": "^1.7.1",
     "mixpanel-browser": "^2.17.1",
     "moment": "^2.22.0",
@@ -127,7 +127,7 @@
     "yarn": "^1.3"
   },
   "lbrySettings": {
-    "lbrynetDaemonVersion": "0.20.0rc14",
+    "lbrynetDaemonVersion": "0.20.0",
     "lbrynetDaemonUrlTemplate": "https://github.com/lbryio/lbry/releases/download/vDAEMONVER/lbrynet-daemon-vDAEMONVER-OSNAME.zip",
     "lbrynetDaemonDir": "static/daemon",
     "lbrynetDaemonFileName": "lbrynet-daemon"
