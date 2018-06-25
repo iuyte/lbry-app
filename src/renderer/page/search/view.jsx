@@ -1,6 +1,8 @@
 // @flow
 import * as React from 'react';
+import * as settings from 'constants/settings';
 import { isURIValid, normalizeURI } from 'lbry-redux';
+import { FormField, FormRow } from 'component/common/form';
 import FileTile from 'component/fileTile';
 import FileListSearch from 'component/fileListSearch';
 import ToolTip from 'component/common/tooltip';
@@ -8,35 +10,54 @@ import Page from 'component/page';
 import Icon from 'component/common/icon';
 import * as icons from 'constants/icons';
 
-const MODAL_ANIMATION_TIME = 250;
-
 type Props = {
   query: ?string,
+  showUnavailable: boolean,
+  resultCount: number,
+  setClientSetting: (string, number | boolean) => void,
 };
 
 class SearchPage extends React.PureComponent<Props> {
   constructor() {
     super();
 
-    this.input = null;
+    (this: any).onShowUnavailableChange = this.onShowUnavailableChange.bind(this);
+    (this: any).onSearchResultCountChange = this.onSearchResultCountChange.bind(this);
   }
 
-  componentDidMount() {
-    // Wait for the modal to animate down before focusing
-    // without this there is an issue with scroll the page down
-    setTimeout(() => {
-      if (this.input) {
-        this.input.focus();
-      }
-    }, MODAL_ANIMATION_TIME);
+  onSearchResultCountChange(event: SyntheticInputEvent<*>) {
+    const count = Number(event.target.value);
+    this.props.setClientSetting(settings.RESULT_COUNT, count);
   }
 
-  input: ?HTMLInputElement;
+  onShowUnavailableChange(event: SyntheticInputEvent<*>) {
+    this.props.setClientSetting(settings.SHOW_UNAVAILABLE, event.target.checked);
+  }
 
   render() {
-    const { query } = this.props;
+    const { query, resultCount, showUnavailable } = this.props;
     return (
       <Page>
+        <React.Fragment>
+          <FormRow alignRight>
+            <FormField
+              type="number"
+              name="result_count"
+              min={10}
+              max={1000}
+              value={resultCount}
+              onChange={this.onSearchResultCountChange}
+              postfix={__('returned results')}
+            />
+            <FormField
+              type="checkbox"
+              name="show_unavailable"
+              onChange={this.onShowUnavailableChange}
+              checked={showUnavailable}
+              postfix={__('Include unavailable content')}
+            />
+          </FormRow>
+        </React.Fragment>
         {isURIValid(query) && (
           <React.Fragment>
             <div className="file-list__header">

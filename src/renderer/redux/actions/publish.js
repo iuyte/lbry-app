@@ -231,7 +231,7 @@ export const doPublish = (params: PublishParams) => (dispatch: Dispatch, getStat
   const success = () => {
     dispatch({
       type: ACTIONS.PUBLISH_SUCCESS,
-      data: { pendingPublish: { ...publishPayload, isEdit: isStillEditing } },
+      data: { pendingPublish: { ...publishPayload } },
     });
     dispatch(doNotify({ id: MODALS.PUBLISH }, { uri }));
   };
@@ -281,7 +281,7 @@ export const doCheckPendingPublishes = () => (dispatch: Dispatch, getState: GetS
 
       dispatch(batchActions(...actions));
 
-      if (!Object.keys(pendingPublishes).length) {
+      if (!Object.keys(pendingPublishMap).length) {
         clearInterval(publishCheckInterval);
       }
     });
@@ -291,6 +291,6 @@ export const doCheckPendingPublishes = () => (dispatch: Dispatch, getState: GetS
     checkFileList();
     publishCheckInterval = setInterval(() => {
       checkFileList();
-    }, 10000);
+    }, 30000);
   }
 };

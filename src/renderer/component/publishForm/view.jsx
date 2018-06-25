@@ -1,6 +1,6 @@
 // @flow
 import * as React from 'react';
-import { isNameValid, buildURI, regexInvalidURI, STATUSES } from 'lbry-redux';
+import { isNameValid, buildURI, regexInvalidURI, THUMBNAIL_STATUSES } from 'lbry-redux';
 import { Form, FormField, FormRow, FormFieldPrice, Submit } from 'component/common/form';
 import Button from 'component/button';
 import ChannelSection from 'component/selectChannel';
@@ -155,10 +155,14 @@ class PublishForm extends React.PureComponent<Props> {
     const { balance, updatePublishForm } = this.props;
 
     let bidError;
-    if (balance <= bid) {
-      bidError = __('Not enough credits');
+    if (bid === 0) {
+      bidError = __('Deposit cannot be 0');
+    } else if (balance === bid) {
+      bidError = __('Please decrease your deposit to account for transaction fees');
+    } else if (balance < bid) {
+      bidError = __('Deposit cannot be higher than your balance');
     } else if (bid <= MINIMUM_PUBLISH_BID) {
-      bidError = __('Your bid must be higher');
+      bidError = __('Your deposit must be higher');
     }
 
     updatePublishForm({ bid, bidError });
@@ -363,7 +367,7 @@ class PublishForm extends React.PureComponent<Props> {
           <section className="card card--section">
             <div className="card__title">{__('Thumbnail')}</div>
             <div className="card__subtitle">
-              {uploadThumbnailStatus === STATUSES.API_DOWN ? (
+              {uploadThumbnailStatus === THUMBNAIL_STATUSES.API_DOWN ? (
                 __('Enter a url for your thumbnail.')
               ) : (
                 <React.Fragment>
@@ -567,7 +571,9 @@ class PublishForm extends React.PureComponent<Props> {
             <Submit
               label={submitLabel}
               disabled={
-                formDisabled || !formValid || uploadThumbnailStatus === STATUSES.IN_PROGRESS
+                formDisabled ||
+                !formValid ||
+                uploadThumbnailStatus === THUMBNAIL_STATUSES.IN_PROGRESS
               }
             />
             <Button button="alt" onClick={this.handleCancelPublish} label={__('Cancel')} />

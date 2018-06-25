@@ -3,12 +3,12 @@ import {
   selectSearchState as selectSearch,
   selectWunderBarAddress,
   doUpdateSearchQuery,
-  doNotify,
-  MODALS,
   doFocusSearchInput,
   doBlurSearchInput,
   doSearch,
 } from 'lbry-redux';
+import { makeSelectClientSetting } from 'redux/selectors/settings';
+import * as settings from 'constants/settings';
 import { doNavigate } from 'redux/actions/navigation';
 import Wunderbar from './view';
 
@@ -23,12 +23,13 @@ const select = state => {
   return {
     ...searchState,
     wunderbarValue,
+    resultCount: makeSelectClientSetting(settings.RESULT_COUNT)(state),
   };
 };
 
 const perform = dispatch => ({
-  onSearch: query => {
-    dispatch(doSearch(query));
+  onSearch: (query, size) => {
+    dispatch(doSearch(query, size));
     dispatch(doNavigate(`/search`, { query }));
   },
   onSubmit: (uri, extraParams) => dispatch(doNavigate('/show', { uri, ...extraParams })),
@@ -37,4 +38,7 @@ const perform = dispatch => ({
   doBlur: () => dispatch(doBlurSearchInput()),
 });
 
-export default connect(select, perform)(Wunderbar);
+export default connect(
+  select,
+  perform
+)(Wunderbar);

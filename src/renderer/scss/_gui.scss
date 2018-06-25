@@ -157,14 +157,13 @@ p {
 }
 
 .page {
-  display: grid;
-  grid-template-rows: var(--header-height) calc(100vh - var(--header-height));
-  grid-template-columns: var(--side-nav-width) auto;
-  grid-template-areas:
-    'nav content'
-    'nav content';
+  position: absolute;
+  top: var(--header-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
   background-color: var(--color-bg);
-  height: 100vh;
 
   @media only screen and (min-width: $medium-breakpoint) {
     grid-template-columns: var(--side-nav-width-m) auto;
@@ -179,8 +178,8 @@ p {
   Page content
 */
 .content {
-  grid-area: content;
-  overflow-y: auto;
+  flex: 1;
+  overflow: auto;
 }
 
 .main {
@@ -190,15 +189,7 @@ p {
 
 .main--contained {
   max-width: 1000px;
-  margin: 0 80px - $spacing-width;
-
-  @media only screen and (min-width: $medium-breakpoint) {
-    margin: 0 120px - $spacing-width;
-  }
-
-  @media only screen and (min-width: $large-breakpoint) {
-    margin: 0 200px - $spacing-width;
-  }
+  margin: auto;
 }
 
 .main--no-padding {

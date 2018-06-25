@@ -5,9 +5,10 @@ import classnames from 'classnames';
 type Props = {
   body: string,
   label?: string,
-  children: ?React.Node,
-  icon: ?boolean,
+  children?: React.Node,
+  icon?: boolean,
   direction: string,
+  onComponent?: boolean, // extra padding to account for button/form field size
 };
 
 class ToolTip extends React.PureComponent<Props> {
@@ -16,9 +17,11 @@ class ToolTip extends React.PureComponent<Props> {
   };
 
   render() {
-    const { children, label, body, icon, direction } = this.props;
+    const { children, label, body, icon, direction, onComponent } = this.props;
 
     const tooltipContent = children || label;
+    const bodyLength = body.length;
+    const isShortDescription = bodyLength < 30;
 
     return (
       <span
@@ -29,10 +32,17 @@ class ToolTip extends React.PureComponent<Props> {
           'tooltip--right': direction === 'right',
           'tooltip--bottom': direction === 'bottom',
           'tooltip--left': direction === 'left',
+          'tooltip--on-component': onComponent,
         })}
       >
         {tooltipContent}
-        <span className="tooltip__body">{body}</span>
+        <span
+          className={classnames('tooltip__body', {
+            'tooltip__body--short': isShortDescription,
+          })}
+        >
+          {body}
+        </span>
       </span>
     );
   }

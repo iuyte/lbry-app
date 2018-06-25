@@ -1,7 +1,7 @@
 // @flow
 import React from 'react';
 import classnames from 'classnames';
-import { normalizeURI } from 'lbry-redux';
+import { normalizeURI, SEARCH_TYPES } from 'lbry-redux';
 import Icon from 'component/common/icon';
 import { parseQueryParams } from 'util/query_params';
 import * as icons from 'constants/icons';
@@ -15,6 +15,7 @@ type Props = {
   suggestions: Array<string>,
   doFocus: () => void,
   doBlur: () => void,
+  resultCount: number,
 };
 
 class WunderBar extends React.PureComponent<Props> {
@@ -29,7 +30,7 @@ class WunderBar extends React.PureComponent<Props> {
   getSuggestionIcon = (type: string) => {
     switch (type) {
       case 'file':
-        return icons.COMPASS;
+        return icons.LOCAL;
       case 'channel':
         return icons.AT_SIGN;
       default:
@@ -45,7 +46,7 @@ class WunderBar extends React.PureComponent<Props> {
   }
 
   handleSubmit(value: string, suggestion?: { value: string, type: string }) {
-    const { onSubmit, onSearch } = this.props;
+    const { onSubmit, onSearch, resultCount } = this.props;
     const query = value.trim();
     const getParams = () => {
       const parts = query.split('?');
@@ -61,7 +62,7 @@ class WunderBar extends React.PureComponent<Props> {
     // User selected a suggestion
     if (suggestion) {
       if (suggestion.type === 'search') {
-        onSearch(query);
+        onSearch(query, resultCount);
       } else {
         const params = getParams();
         const uri = normalizeURI(query);
@@ -78,7 +79,7 @@ class WunderBar extends React.PureComponent<Props> {
       const params = getParams();
       onSubmit(uri, params);
     } catch (e) {
-      onSearch(query);
+      onSearch(query, resultCount);
     }
   }
 
@@ -92,7 +93,7 @@ class WunderBar extends React.PureComponent<Props> {
         <Icon icon={icons.SEARCH} />
         <Autocomplete
           autoHighlight
-          wrapperStyle={{ flex: 1 }}
+          wrapperStyle={{ flex: 1, position: 'relative' }}
           value={wunderbarValue || ''}
           items={suggestions}
           getItemValue={item => item.value}
@@ -109,7 +110,7 @@ class WunderBar extends React.PureComponent<Props> {
               placeholder="Enter LBRY URL here or search for videos, music, games and more"
             />
           )}
-          renderItem={({ value, type, shorthand }, isHighlighted) => (
+          renderItem={({ value, type }, isHighlighted) => (
             <div
               key={value}
               className={classnames('wunderbar__suggestion', {
@@ -117,11 +118,13 @@ class WunderBar extends React.PureComponent<Props> {
               })}
             >
               <Icon icon={this.getSuggestionIcon(type)} />
-              <span className="wunderbar__suggestion-label">{shorthand || value}</span>
-              {(true || isHighlighted) && (
+              <span className="wunderbar__suggestion-label">{value}</span>
+              {isHighlighted && (
                 <span className="wunderbar__suggestion-label--action">
                   {'-  '}
-                  {type === 'search' ? 'Search' : value}
+                  {type === SEARCH_TYPES.SEARCH && __('Search')}
+                  {type === SEARCH_TYPES.CHANNEL && __('View channel')}
+                  {type === SEARCH_TYPES.FILE && __('View file')}
                 </span>
               )}
             </div>

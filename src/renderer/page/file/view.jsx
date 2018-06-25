@@ -7,7 +7,6 @@ import FilePrice from 'component/filePrice';
 import FileDetails from 'component/fileDetails';
 import FileActions from 'component/fileActions';
 import UriIndicator from 'component/uriIndicator';
-import { FormField, FormRow } from 'component/common/form';
 import Icon from 'component/common/icon';
 import DateTime from 'component/dateTime';
 import * as icons from 'constants/icons';
@@ -20,6 +19,8 @@ import type { Claim } from 'types/claim';
 import type { Subscription } from 'types/subscription';
 import FileDownloadLink from 'component/fileDownloadLink';
 import classnames from 'classnames';
+import { FormField, FormRow } from 'component/common/form';
+import ToolTip from 'component/common/tooltip';
 
 type Props = {
   claim: Claim,
@@ -170,10 +171,10 @@ class FilePage extends React.Component<Props> {
               <div className="card__title-identity--file">
                 <h1 className="card__title card__title--file">{title}</h1>
                 <div className="card__title-identity-icons">
-                  <FilePrice uri={normalizeURI(uri)} />
                   {isRewardContent && (
                     <Icon iconColor="red" tooltip="bottom" icon={icons.FEATURED} />
                   )}
+                  <FilePrice uri={normalizeURI(uri)} />
                 </div>
               </div>
               <span className="card__subtitle card__subtitle--file">
@@ -183,29 +184,27 @@ class FilePage extends React.Component<Props> {
               {metadata.nsfw && <div>NSFW</div>}
               <div className="card__channel-info">
                 <UriIndicator uri={uri} link />
-                <div className="card__actions card__actions--no-margin">
-                  {claimIsMine ? (
-                    <Button
-                      button="primary"
-                      icon={icons.EDIT}
-                      label={__('Edit')}
-                      onClick={() => {
-                        prepareEdit(claim, editUri);
-                        navigate('/publish');
-                      }}
-                    />
-                  ) : (
-                    <SubscribeButton uri={subscriptionUri} channelName={channelName} />
-                  )}
-                </div>
               </div>
-              {!claimIsMine ||
-                (speechSharable && (
-                  <div className="card__actions card__actions--end">
+              <div className="card__actions card__actions--no-margin card__actions--between">
+                {(claimIsMine || subscriptionUri || speechSharable) && (
+                  <div className="card__actions">
+                    {claimIsMine ? (
+                      <Button
+                        button="primary"
+                        icon={icons.EDIT}
+                        label={__('Edit')}
+                        onClick={() => {
+                          prepareEdit(claim, editUri);
+                          navigate('/publish');
+                        }}
+                      />
+                    ) : (
+                      <SubscribeButton uri={subscriptionUri} channelName={channelName} />
+                    )}
                     {!claimIsMine && (
                       <Button
                         button="alt"
-                        icon="Send"
+                        icon={icons.GIFT}
                         label={__('Enjoy this? Send a tip')}
                         onClick={() => openModal({ id: MODALS.SEND_TIP }, { uri })}
                       />
@@ -214,23 +213,26 @@ class FilePage extends React.Component<Props> {
                       <ViewOnWebButton claimId={claim.claim_id} claimName={claim.name} />
                     )}
                   </div>
-                ))}
-              <FormRow alignRight>
-                <FormField
-                  type="checkbox"
-                  name="autoplay"
-                  onChange={this.onAutoplayChange}
-                  checked={autoplay}
-                  postfix={__('Autoplay')}
-                />
+                )}
+
+                <div className="card__actions">
+                  <FileDownloadLink uri={uri} />
+                  <FileActions uri={uri} claimId={claim.claim_id} />
+                </div>
+              </div>
+              <FormRow padded>
+                <ToolTip onComponent body={__('Automatically download and play free content.')}>
+                  <FormField
+                    useToggle
+                    name="autoplay"
+                    type="checkbox"
+                    postfix={__('Autoplay')}
+                    checked={autoplay}
+                    onChange={this.onAutoplayChange}
+                  />
+                </ToolTip>
               </FormRow>
             </div>
-
-            <div className="card__content">
-              <FileDownloadLink uri={uri} />
-              <FileActions uri={uri} claimId={claim.claim_id} />
-            </div>
-
             <div className="card__content--extra-padding">
               <FileDetails uri={uri} />
             </div>

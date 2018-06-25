@@ -22,7 +22,7 @@ export const selectClaimsWithPendingPublishes = createSelector(
     });
 
     const filteredPendingPublishes = pendingPublishes.filter(claim => !claimMap[claim.name]);
-    return [...claims, ...filteredPendingPublishes];
+    return [...filteredPendingPublishes, ...claims];
   }
 );
 
@@ -40,7 +40,7 @@ export const selectPendingPublish = uri =>
     }
 
     return pendingPublishes.filter(
-      publish => (publish.name === claimName || publish.name === contentName) && !publish.isEdit
+      publish => publish.name === claimName || publish.name === contentName
     )[0];
   });
 
